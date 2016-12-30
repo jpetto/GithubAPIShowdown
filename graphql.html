@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Github API Showdown - GraphQL</title>
+    <link rel="stylesheet" href="showdown.css">
+</head>
+<body>
+
+<header>
+    <h1>Github API Showdown</h1>
+    <h2>Challenger: GraphQL</h2>
+</header>
+<main>
+    <section class="results">
+
+    </section>
+</main>
+
+<script>
+(function() {
+    'use strict';
+
+    let testQuery = {
+        'query':    `query {
+                        viewer {
+                            login
+                            following(first: 3) {
+                                edges {
+                                    user:node {
+                                        avatarURL
+                                        login
+                                        name
+                                        url
+                                    }
+                                }
+                            }
+                            organizations(first: 2) {
+                                edges {
+                                    org:node {
+                                        avatarURL
+                                        name
+                                        url
+                                    }
+                                }
+                            }
+                        }
+                    }`
+    };
+
+    let httpHeaders = new Headers({
+        'Authorization': 'Bearer ' + token;
+    });
+
+    console.log(testQuery);
+
+    fetch('https://api.github.com/graphql', {
+        headers: httpHeaders,
+        method: 'POST',
+        body: JSON.stringify(testQuery)
+    }).then(response => {
+        console.log('Fetch success!');
+        return response.json()
+    }).then(responseJSON => {
+        console.log(responseJSON);
+    }).catch(err => {
+        console.log('Fetch error!');
+        console.error(err);
+    });
+})();
+</script>
+
+</body>
+</html>
