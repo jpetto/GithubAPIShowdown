@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Github API Showdown - GraphQL</title>
     <link rel="stylesheet" href="showdown.css">
+
+    <link rel="import" href="templates.html">
 </head>
 <body>
 
@@ -13,11 +15,35 @@
     <h2>Challenger: GraphQL</h2>
 </header>
 <main>
-    <section class="results">
+    <section id="results">
 
     </section>
 </main>
 
+<template id="results-template">
+    <dl>
+        <dt>Login</dt>
+        <dd class="login"></dd>
+        <dt>Following</dt>
+        <dd class="following">
+            <ul></ul>
+        </dd>
+    </dl>
+</template>
+
+<template id="following-template">
+    <li>
+        <img src="" />
+        <a href=""></a>
+    </li>
+</template>
+
+<!--
+create a config.js file with only this line:
+
+const token = 'yourgithubtokenhere';
+-->
+<script src="config.js"></script>
 <script>
 (function() {
     'use strict';
@@ -50,10 +76,8 @@
     };
 
     let httpHeaders = new Headers({
-        'Authorization': 'Bearer ' + token;
+        'Authorization': 'Bearer ' + token
     });
-
-    console.log(testQuery);
 
     fetch('https://api.github.com/graphql', {
         headers: httpHeaders,
@@ -63,11 +87,51 @@
         console.log('Fetch success!');
         return response.json()
     }).then(responseJSON => {
-        console.log(responseJSON);
+        populateTemplate(responseJSON);
     }).catch(err => {
         console.log('Fetch error!');
         console.error(err);
     });
+
+    function populateFollowing(json) {
+
+    }
+
+    function populateTemplate(json) {
+        console.log(json);
+
+        // convenience for accessing data
+        const data = json.data;
+        const followingData = data.viewer.following.edges;
+        const orgData = data.viewer.organizations.edges;
+
+        const results = document.querySelector('#results');
+
+        // template stuff
+        const followingTemplate = document.querySelector('#following-template');
+        const resultsTemplate = document.querySelector('#results-template');
+
+        // populate following template
+        const followingA = followingTemplate.content.querySelector('a');
+        const followingImg = followingTemplate.content.querySelector('img');
+
+        followingA.textContent = `${followingData[0].user.name} (${followingData[0].user.login})`;
+        followingA.setAttribute('href', followingData[0].user.url);
+        followingImg.setAttribute('src', followingData[0].user.avatarURL);
+
+        const followingClone = document.importNode(followingTemplate.content, true);
+
+        // populate parent template
+        const login = resultsTemplate.content.querySelector('.login');
+        login.textContent = json.data.viewer.login;
+
+        const following = resultsTemplate.content.querySelector('.following');
+        following.appendChild(followingClone);
+
+        const resultsClone = document.importNode(resultsTemplate.content, true);
+
+        results.appendChild(resultsClone);
+    };
 })();
 </script>
 
